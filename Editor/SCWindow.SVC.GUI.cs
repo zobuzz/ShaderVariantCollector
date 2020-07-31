@@ -52,9 +52,8 @@ namespace ShaderControl {
 
         void DrawSVCGUI() {
 
-            GUILayout.Box(new GUIContent(" 1. Load all scenes in BuildSettings , for g_CurrentShaderVariantCollection collect\n 2. Instantiate All Prefabs in specific scene.\nUse the <b>Build View</b> tab for a list of shaders and keywords used in your build, including hidden/internal Unity shaders."), titleStyle, GUILayout.ExpandWidth(true));
+            GUILayout.Box(new GUIContent(" 1. Load all scenes in BuildSettings , for g_CurrentShaderVariantCollection collect\n 2. Instantiate All Prefabs in specific scene.\n"), titleStyle, GUILayout.ExpandWidth(true));
 
-            EditorGUILayout.Separator();
 
             GUILayout.Label(string.Format("Currently tracked: {0} shaders {1} total variants",
                 SVCTool.ShaderUtils.GetCurrentShaderVariantCollectionShaderCount(), SVCTool.ShaderUtils.GetCurrentShaderVariantCollectionVariantCount()));
@@ -65,20 +64,40 @@ namespace ShaderControl {
             //EditorGUILayout.EndHorizontal();
 
             EditorGUILayout.BeginHorizontal();
-
-            if (GUILayout.Button(new GUIContent("Clear Global Shader Variants Collection", "Switch to an empty scene and clear all current SVC.")))
             {
-                ClearCurrentSVC();
-                GUIUtility.ExitGUI();
-                return;
+                if (GUILayout.Button(new GUIContent("Clear Global SVC", "Switch to an empty scene and clear all current SVC.")))
+                {
+                    ClearCurrentSVC();
+                    GUIUtility.ExitGUI();
+                    return;
+                }
             }
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.EndVertical();
+            EditorGUILayout.Separator();
+            EditorGUILayout.Separator();
+
+
+            EditorGUILayout.BeginVertical(blackStyle);
+            //EditorGUILayout.BeginHorizontal();
+            {
+                DrawPrafabScanUI();
+                if (GUILayout.Button(new GUIContent("Collection All Prefab SVC", "Switch to prebuild scene and collect all material variants")))
+                {
+                    ClearCurrentSVC();
+                    GUIUtility.ExitGUI();
+                    return;
+                }
+            }
+            //EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Separator();
+            DrawUILine(Color.grey);
 
             EditorGUILayout.BeginVertical(blackStyle);
             EditorGUILayout.BeginHorizontal();
 
-            if (GUILayout.Button(new GUIContent("Collect Shader Variants in all Build Scenes", "Quickly scans the project and finds shaders that use keywords."))) {
+            if (GUILayout.Button(new GUIContent("Collect SVC in all Build Scenes", "Quickly scans the project and finds shaders that use keywords."))) {
                 LoadAllScenesCollectMaterial();
                 GUIUtility.ExitGUI();
                 return;
@@ -93,6 +112,26 @@ namespace ShaderControl {
             //}
             EditorGUILayout.EndHorizontal();
             EditorGUILayout.EndVertical();
+            EditorGUILayout.Separator();
+
+            EditorGUILayout.BeginVertical(blackStyle);
+            EditorGUILayout.BeginHorizontal();
+            {
+                if (GUILayout.Button(new GUIContent("Save Global Shader Variant", "save current shader variants")))
+                {
+                    string message = "Save shader variant collection";
+                    string assetPath = EditorUtility.SaveFilePanelInProject("Save Shader Variant Collection", "NewShaderVariants", "shadervariants", message);
+                    if (!string.IsNullOrEmpty(assetPath))
+                        SVCTool.ShaderUtils.SaveCurrentShaderVariantCollection(assetPath);
+
+                    GUIUtility.ExitGUI();
+                    return;
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndVertical();
+            EditorGUILayout.Separator();
+
 
             if (shaders != null) {
                 string totalGlobalKeywordsTxt = totalGlobalKeywords != totalKeywords ? " (" + totalGlobalKeywords + " global) " : " ";
