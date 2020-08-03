@@ -82,9 +82,9 @@ namespace ShaderControl {
             //EditorGUILayout.BeginHorizontal();
             {
                 DrawPrafabScanUI();
-                if (GUILayout.Button(new GUIContent("Collection All Prefab SVC", "Switch to prebuild scene and collect all material variants")))
+                if (GUILayout.Button(new GUIContent("Collect All Prefab SVC", "Switch to prebuild scene and collect all material variants")))
                 {
-                    ClearCurrentSVC();
+                    CollectAllPrefabSVC();
                     GUIUtility.ExitGUI();
                     return;
                 }

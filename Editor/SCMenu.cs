@@ -6,8 +6,8 @@ namespace ShaderControl
 {
 	public class SCMenu : Editor
 	{
-		[MenuItem ("Window/Browse Shaders...", false, 200)]
-		static void BrowseShaders (MenuCommand command)
+		[MenuItem ("Window/Manage Shaders...", false, 200)]
+		static void ManageShaders (MenuCommand command)
 		{
 			SCWindow.ShowWindow();
 		}

@@ -165,9 +165,44 @@ namespace ShaderControl {
 
         void ClearCurrentSVC()
         {
+            if(EditorApplication.isPlaying)
+            {
+                Debug.LogError("Cannot collect SVC in playing");
+                return;
+            }
             //switch to a EmptyScene scene
             EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
             SVCTool.ShaderUtils.ClearCurrentShaderVariantCollection();
+        }
+
+        void CollectAllPrefabSVC()
+        {
+            if (null == envSettingsInfo || null == envSettingsInfo.m_prefabFolders)
+            {
+                Debug.LogError("Prefab path is null can not collect");
+                return;
+            }
+            if (EditorApplication.isPlaying)
+            {
+                Debug.LogError("Cannot collect SVC in playing");
+                return;
+            }
+            string[] searchPaths = envSettingsInfo.m_prefabFolders.ToArray();
+
+            int prefixLen = Application.dataPath.LastIndexOf('/');
+            for(int i=0; i<searchPaths.Length; i++)
+            {
+                searchPaths[i] = searchPaths[i].Substring(prefixLen + 1);
+            }
+            string[] allPrefabs = AssetDatabase.FindAssets("t:prefab", searchPaths);
+            for(int i=0; i<allPrefabs.Length; i++)
+            {
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(allPrefabs[i]));
+
+                Instantiate(prefab);
+                Debug.Log("Instantiate Prefab at path:" + allPrefabs[i]);
+                //TODO by sj
+            }
         }
 
         void LoadAllScenesCollectMaterial()
