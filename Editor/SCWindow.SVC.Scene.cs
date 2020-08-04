@@ -21,15 +21,6 @@ namespace ShaderControl {
 
         SCEnvSettings envSettingsInfo;
 
-        public void Init()
-        {
-            if(null == envSettingsInfo)
-            {
-                string filename = GetSettingsStorePath();
-                envSettingsInfo = AssetDatabase.LoadAssetAtPath<SCEnvSettings>(filename);
-            }
-        }
-
         public static SCEnvSettings CheckEnvSettingsStore(SCEnvSettings envsettings)
         {
             if (envsettings == null)
@@ -68,7 +59,6 @@ namespace ShaderControl {
             return null;
         }
 
-
         void DrawPrafabScanUI()
         {
             envSettingsInfo = CheckEnvSettingsStore(envSettingsInfo);
@@ -82,6 +72,21 @@ namespace ShaderControl {
                 EditorGUILayout.LabelField("Set Prefa Scan Folders:");
             }
             EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUI.BeginChangeCheck();
+                {
+                    envSettingsInfo.m_sceneAsset = EditorGUILayout.ObjectField(envSettingsInfo.m_sceneAsset, typeof(SceneAsset), true);
+                }
+                if (EditorGUI.EndChangeCheck())
+                {
+                    EditorUtility.SetDirty(envSettingsInfo);
+                    AssetDatabase.SaveAssets();
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
 
             for (int i=0; i<envSettingsInfo.m_prefabFolders.Count; i++)
             {
@@ -177,7 +182,7 @@ namespace ShaderControl {
 
         void CollectAllPrefabSVC()
         {
-            if (null == envSettingsInfo || null == envSettingsInfo.m_prefabFolders)
+            if (null == envSettingsInfo || null == envSettingsInfo.m_prefabFolders || null == envSettingsInfo.m_sceneAsset)
             {
                 Debug.LogError("Prefab path is null can not collect");
                 return;
@@ -187,6 +192,12 @@ namespace ShaderControl {
                 Debug.LogError("Cannot collect SVC in playing");
                 return;
             }
+            string scenePath = AssetDatabase.GetAssetPath(envSettingsInfo.m_sceneAsset);
+            if(scenePath != EditorApplication.currentScene)
+            {
+                EditorSceneManager.OpenScene(scenePath);
+            }
+
             string[] searchPaths = envSettingsInfo.m_prefabFolders.ToArray();
 
             int prefixLen = Application.dataPath.LastIndexOf('/');

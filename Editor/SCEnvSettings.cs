@@ -11,5 +11,7 @@ namespace ShaderControl
         public List<string> m_prefabFolders;
 
         public List<Shader> m_ignoreShaders;
+
+        public UnityEngine.Object m_sceneAsset;
     }
 }
