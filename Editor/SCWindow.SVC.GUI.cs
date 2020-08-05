@@ -94,6 +94,10 @@ namespace ShaderControl {
             EditorGUILayout.Separator();
             DrawUILine(Color.grey);
 
+            DrawIgnoreShaderUI();
+            DrawUILine(Color.grey);
+            EditorGUILayout.Separator();
+
             EditorGUILayout.BeginVertical(blackStyle);
             EditorGUILayout.BeginHorizontal();
 
@@ -122,7 +126,10 @@ namespace ShaderControl {
                     string message = "Save shader variant collection";
                     string assetPath = EditorUtility.SaveFilePanelInProject("Save Shader Variant Collection", "NewShaderVariants", "shadervariants", message);
                     if (!string.IsNullOrEmpty(assetPath))
+                    {
                         SVCTool.ShaderUtils.SaveCurrentShaderVariantCollection(assetPath);
+                        PostProcessSavedSVC(assetPath);
+                    }
 
                     GUIUtility.ExitGUI();
                     return;

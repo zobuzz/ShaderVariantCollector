@@ -59,6 +59,62 @@ namespace ShaderControl {
             return null;
         }
 
+        void DrawIgnoreShaderUI()
+        {
+            envSettingsInfo = CheckEnvSettingsStore(envSettingsInfo);
+            if (null == envSettingsInfo)
+                return;
+            if (null == envSettingsInfo.m_ignoreShaders)
+                envSettingsInfo.m_ignoreShaders = new List<Shader>();
+
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUILayout.LabelField("Set Ignore Shaders, count:" + envSettingsInfo.m_ignoreShaders.Count);
+            }
+            EditorGUILayout.EndHorizontal();
+
+            for (int i = 0; i < envSettingsInfo.m_ignoreShaders.Count; i++)
+            {
+                EditorGUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField(string.Format("Ignore {0}:", (i + 1)), GUILayout.Width(80));
+
+                EditorGUI.BeginChangeCheck();{
+                    envSettingsInfo.m_ignoreShaders[i] = (Shader)EditorGUILayout.ObjectField(envSettingsInfo.m_ignoreShaders[i], typeof(Shader), false);
+
+                    if (GUILayout.Button("¡ª", GUILayout.Width(30)))
+                    {
+                        //delete in loop
+                        envSettingsInfo.m_ignoreShaders.RemoveAt(i);
+                        i--;
+                    }
+                }
+                if (EditorGUI.EndChangeCheck()){
+                    EditorUtility.SetDirty(envSettingsInfo);
+                    AssetDatabase.SaveAssets();
+                }
+
+                EditorGUILayout.EndHorizontal();
+            }
+
+            EditorGUILayout.BeginVertical(blackStyle);
+            EditorGUILayout.BeginHorizontal();
+            {
+                EditorGUI.BeginChangeCheck();{
+                    if (GUILayout.Button(new GUIContent("Add Shader")))
+                    {
+                        envSettingsInfo.m_ignoreShaders.Add(null);
+                    }
+                }
+                if (EditorGUI.EndChangeCheck()){
+                    EditorUtility.SetDirty(envSettingsInfo);
+                    AssetDatabase.SaveAssets();
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.EndVertical();
+
+        }
+
         void DrawPrafabScanUI()
         {
             envSettingsInfo = CheckEnvSettingsStore(envSettingsInfo);
@@ -119,7 +175,7 @@ namespace ShaderControl {
             {
                 EditorGUI.BeginChangeCheck();
                 {
-                    if (GUILayout.Button(new GUIContent("Add Prefab Scan Folder")))
+                    if (GUILayout.Button(new GUIContent("Add Folder")))
                     {
                         envSettingsInfo.m_prefabFolders.Add("");
                     }
@@ -229,6 +285,39 @@ namespace ShaderControl {
             EditorCoroutineUtility.StartCoroutine(LoadAllEditorBuildScenes(), this);
         }
 
+        void PostProcessSavedSVC(string svcPath)
+        {
+            ShaderVariantCollection svc = AssetDatabase.LoadAssetAtPath<ShaderVariantCollection>(svcPath);
+            if (null == svc)
+                return;
+            if (null == envSettingsInfo || null == envSettingsInfo.m_ignoreShaders)
+                return;
+
+
+            var serializedObject = new SerializedObject(svc);
+            SerializedProperty m_Shaders = serializedObject.FindProperty("m_Shaders");
+            if (null == m_Shaders)
+                return;
+
+            Debug.Log("SVC origin shader:" + svc.shaderCount + " variant:" + svc.variantCount);
+            int count = 0;
+            for (int i=0; i< m_Shaders.arraySize; ++i)
+            {
+                var entryProp = m_Shaders.GetArrayElementAtIndex(i);
+                Shader shader = (Shader)entryProp.FindPropertyRelative("first").objectReferenceValue;
+                if(envSettingsInfo.m_ignoreShaders.Contains(shader))
+                {
+                    Debug.Log("[Postprocess SVC] remove ignore shader:" + shader.name);
+                    m_Shaders.DeleteArrayElementAtIndex(i);
+                    count++;
+                    i--;
+                }
+            }
+            serializedObject.ApplyModifiedProperties();
+
+            EditorUtility.DisplayDialog("Success", string.Format("SVC shader count: {0} , variant count: {1}, remove ignore shader count: {2}", svc.shaderCount, svc.variantCount, count), "ok");
+        }
+
         public static void DrawUILine(Color color, int thickness = 2, int padding = 10)
         {
             Rect r = EditorGUILayout.GetControlRect(GUILayout.Height(padding + thickness));
@@ -238,6 +327,5 @@ namespace ShaderControl {
             r.width += 6;
             EditorGUI.DrawRect(r, color);
         }
-
     }
 }
