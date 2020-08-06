@@ -17,13 +17,14 @@ namespace ShaderControl {
         enum ViewMode {
             Build,
             Project,
-            SVC
+            SVC,
+            SVCManager
         }
 
         const string EDITOR_PREFIX = "ShaderControl_";
 
         ViewMode viewMode;
-        string[] viewModeTexts = { "Build View", "Project View", "Shader Variant Collection View" };
+        string[] viewModeTexts = { "Build View", "Project View", "Collect Shader Variant", "SVC Manager" };
 
         #region Unity events
 
@@ -107,7 +108,7 @@ namespace ShaderControl {
             EditorGUILayout.BeginVertical(blackStyle);
 
             ViewMode prevMode = viewMode;
-            viewMode = (ViewMode)GUILayout.SelectionGrid((int)viewMode, viewModeTexts, 3);
+            viewMode = (ViewMode)GUILayout.SelectionGrid((int)viewMode, viewModeTexts, 4);
             if (viewMode == ViewMode.Project) {
                 DrawProjectGUI();
             }
@@ -118,11 +119,14 @@ namespace ShaderControl {
                 }
                 DrawBuildGUI();
             }
-            else
+            else if(viewMode == ViewMode.SVC)
             {
                 DrawSVCGUI();
             }
-
+            else
+            {
+                DrawSVCMgrGUI();
+            }
         }
 
         void OnInspectorUpdate() {

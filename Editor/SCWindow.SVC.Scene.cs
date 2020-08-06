@@ -125,7 +125,7 @@ namespace ShaderControl {
 
             EditorGUILayout.BeginHorizontal();
             {
-                EditorGUILayout.LabelField("Set Prefa Scan Folders:");
+                EditorGUILayout.LabelField("Set Prefab Scan Folders:");
             }
             EditorGUILayout.EndHorizontal();
 
